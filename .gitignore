@@ -169,7 +169,6 @@ dmypy.json
 
 # Test data files (동적으로 생성되는 파일들)
 test-scenarios-final.csv
-test-data/test-data.json
 
 # Local environment (민감 정보)
 .env 

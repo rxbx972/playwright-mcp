@@ -5,103 +5,81 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-TEST_DATA_DIR = PROJECT_ROOT / 'test-data'
-TEST_DATA_PATH = TEST_DATA_DIR / 'test-data.json'
-TEST_DATA_EXAMPLE_PATH = TEST_DATA_DIR / 'test-data.example.json'
+ENV_PATH = PROJECT_ROOT / '.env'
+TEST_DATA_PATH = PROJECT_ROOT / 'test-data' / 'test-data.json'
 
-REQUIRED_FIELDS = [
-    ('domain', 'BASE_URL', 'BASE_URL'),
-    ('test_users.A.id', 'TEST_USER_A_ID', 'TEST_USER_A_ID'),
-    ('test_users.A.password', 'TEST_USER_A_PASSWORD', 'TEST_USER_A_PASSWORD'),
-    ('test_users.B.password', 'TEST_USER_B_PASSWORD', 'TEST_USER_B_PASSWORD'),
-    ('test_users.B.name', 'TEST_USER_B_NAME', 'TEST_USER_B_NAME'),
-    ('test_users.B.initial_password', 'TEST_USER_B_INITIAL_PASSWORD', 'TEST_USER_B_INITIAL_PASSWORD'),
+REQUIRED_ENV_VARS = [
+    'BASE_URL',
+    'TEST_USER_A_ID',
+    'TEST_USER_A_PASSWORD',
+    'TEST_USER_B_PASSWORD',
+    'TEST_USER_B_NAME',
+    'TEST_USER_B_INITIAL_PASSWORD',
 ]
 
 
-def _get_nested_value(data, key_path):
-    current = data
-    for key in key_path.split('.'):
-        if not isinstance(current, dict):
-            return None
-        current = current.get(key)
-    return current
-
-
-def _set_nested_value(data, key_path, value):
-    keys = key_path.split('.')
-    current = data
-    for key in keys[:-1]:
-        if key not in current:
-            current[key] = {}
-        current = current[key]
-    current[keys[-1]] = value
-
-
-def apply_env_overrides(test_data):
-    result = json.loads(json.dumps(test_data))
-
-    env_mappings = {
-        'domain': 'BASE_URL',
-        'test_users.A.id': 'TEST_USER_A_ID',
-        'test_users.A.password': 'TEST_USER_A_PASSWORD',
-        'test_users.B.id': 'TEST_USER_B_ID',
-        'test_users.B.password': 'TEST_USER_B_PASSWORD',
-        'test_users.B.name': 'TEST_USER_B_NAME',
-        'test_users.B.initial_password': 'TEST_USER_B_INITIAL_PASSWORD',
-    }
-
-    for field_path, env_name in env_mappings.items():
-        value = os.environ.get(env_name)
-        if value:
-            _set_nested_value(result, field_path, value)
-
-    return result
-
-
-def validate_test_data(test_data):
-    missing = [
-        label
-        for field_path, _, label in REQUIRED_FIELDS
-        if not _get_nested_value(test_data, field_path)
-    ]
+def validate_env():
+    missing = [name for name in REQUIRED_ENV_VARS if not os.environ.get(name)]
 
     if missing:
         raise ValueError(
-            f"필수 테스트 설정이 없습니다: {', '.join(missing)}\n"
+            f"필수 환경 변수가 없습니다: {', '.join(missing)}\n"
             "`.env` 파일을 생성하세요: cp .env.example .env"
         )
 
 
-def resolve_test_data_path():
-    if TEST_DATA_PATH.exists():
-        return TEST_DATA_PATH
-    if TEST_DATA_EXAMPLE_PATH.exists():
-        return TEST_DATA_EXAMPLE_PATH
-    raise FileNotFoundError(
-        'test-data/test-data.json 또는 test-data/test-data.example.json 파일이 필요합니다.'
-    )
+def apply_env_config(test_data):
+    return {
+        **test_data,
+        'domain': os.environ.get('BASE_URL', ''),
+        'test_users': {
+            'A': {
+                'id': os.environ.get('TEST_USER_A_ID', ''),
+                'password': os.environ.get('TEST_USER_A_PASSWORD', ''),
+            },
+            'B': {
+                'id': os.environ.get('TEST_USER_B_ID', ''),
+                'password': os.environ.get('TEST_USER_B_PASSWORD', ''),
+                'name': os.environ.get('TEST_USER_B_NAME', ''),
+                'initial_password': os.environ.get('TEST_USER_B_INITIAL_PASSWORD', ''),
+            },
+        },
+    }
 
 
-def ensure_test_data_file():
-    if not TEST_DATA_PATH.exists() and TEST_DATA_EXAMPLE_PATH.exists():
-        TEST_DATA_PATH.write_text(
-            TEST_DATA_EXAMPLE_PATH.read_text(encoding='utf-8'),
-            encoding='utf-8',
-        )
-    return TEST_DATA_PATH
+def update_env_var(key, value, env_path=None):
+    env_path = Path(env_path) if env_path else ENV_PATH
+
+    if not env_path.exists():
+        raise FileNotFoundError('`.env` 파일이 필요합니다: cp .env.example .env')
+
+    lines = env_path.read_text(encoding='utf-8').splitlines()
+    found = False
+    updated_lines = []
+
+    for line in lines:
+        if line.strip().startswith(f'{key}='):
+            updated_lines.append(f'{key}={value}')
+            found = True
+        else:
+            updated_lines.append(line)
+
+    if not found:
+        updated_lines.append(f'{key}={value}')
+
+    env_path.write_text('\n'.join(updated_lines) + '\n', encoding='utf-8')
 
 
 def load_test_data(validate=True):
-    load_dotenv(PROJECT_ROOT / '.env')
-
-    file_path = resolve_test_data_path()
-    with open(file_path, 'r', encoding='utf-8') as f:
-        test_data = json.load(f)
-
-    merged = apply_env_overrides(test_data)
+    load_dotenv(ENV_PATH)
 
     if validate:
-        validate_test_data(merged)
+        validate_env()
 
-    return merged
+    if not TEST_DATA_PATH.exists():
+        raise FileNotFoundError('test-data/test-data.json 파일이 필요합니다.')
+
+    with open(TEST_DATA_PATH, 'r', encoding='utf-8') as f:
+        test_data = json.load(f)
+
+    return apply_env_config(test_data)

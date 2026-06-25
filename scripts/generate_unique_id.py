@@ -1,11 +1,10 @@
 import datetime
-import json
 import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from load_test_data import TEST_DATA_PATH, ensure_test_data_file
+from load_test_data import ENV_PATH, update_env_var
 
 
 def generate_unique_id():
@@ -28,32 +27,24 @@ def generate_unique_id():
     return unique_id
 
 
-def update_test_data():
-    """test-data.json 파일을 읽어서 유니크한 ID로 업데이트합니다."""
-    test_data_path = ensure_test_data_file()
+def update_test_user_b_id():
+    """`.env` 파일의 TEST_USER_B_ID를 유니크한 ID로 갱신합니다."""
+    if not ENV_PATH.exists():
+        print(f"Error: .env 파일을 찾을 수 없습니다: {ENV_PATH}")
+        print("`.env` 파일을 생성하세요: cp .env.example .env")
+        return None
 
     try:
-        with open(test_data_path, 'r', encoding='utf-8') as f:
-            test_data = json.load(f)
-
         unique_id = generate_unique_id()
-        test_data['test_users']['B']['id'] = unique_id
-
-        with open(test_data_path, 'w', encoding='utf-8') as f:
-            json.dump(test_data, f, ensure_ascii=False, indent=2)
-
+        update_env_var('TEST_USER_B_ID', unique_id)
         return unique_id
     except Exception as e:
-        print(f"Error: test-data.json 파일 처리 중 오류 발생: {e}")
+        print(f"Error: .env 파일 처리 중 오류 발생: {e}")
         return None
 
 
 def main():
-    if not TEST_DATA_PATH.parent.exists():
-        print(f"Error: test-data 디렉토리를 찾을 수 없습니다: {TEST_DATA_PATH.parent}")
-        return
-
-    update_test_data()
+    update_test_user_b_id()
 
 
 if __name__ == "__main__":

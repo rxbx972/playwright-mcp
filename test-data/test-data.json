@@ -1,17 +1,4 @@
 {
-  "domain": "",
-  "test_users": {
-    "A": {
-      "id": "",
-      "password": ""
-    },
-    "B": {
-      "id": "",
-      "password": "",
-      "name": "auto테스트",
-      "initial_password": ""
-    }
-  },
   "validation_messages": {
     "name_min_length": "이름은 최소 2자 이상이어야 합니다",
     "success_registration": "사용자 등록이 완료되었습니다.",
