@@ -20,6 +20,7 @@ tests/
 
 ## 새 시나리오 추가
 
+0. **(권장)** [mcp-workflow.md](mcp-workflow.md) — Cursor Playwright MCP로 Step을 브라우저에서 먼저 확인
 1. `test-data/test-data.json` — 검증 메시지·입력값 추가 (비민감 데이터)
 2. `test-data/users-test-scenarios.csv` — `Scenario Id`, `Step Id`, `Step`, `Expected Result` 행 추가
 3. `replacePlaceholders()` — 새 플레이스홀더 패턴 등록 (필요 시)
@@ -51,10 +52,11 @@ test('users_XX_YY: 설명', async ({ page }) => {
 
 ## UI·정책 변경 시 점검 순서
 
-1. `users-test-scenarios.csv` — Step·Expected Result가 현행 UI와 일치하는지 확인
-2. `executeScenario()` — 셀렉터·네비게이션 플로우 수정
-3. `test-data.json` — 검증 메시지 문구 확인
-4. 미구현 시나리오 — `users_03_02` ~ `users_05_01`, `users_lifecycle` 재개
+1. **Playwright MCP** — 변경된 화면·네비게이션을 Cursor에서 직접 확인 ([mcp-workflow.md](mcp-workflow.md))
+2. `users-test-scenarios.csv` — Step·Expected Result가 현행 UI와 일치하는지 확인
+3. `executeScenario()` — 셀렉터·네비게이션 플로우 수정
+4. `test-data.json` — 검증 메시지 문구 확인
+5. 미구현 시나리오 — `users_03_02` ~ `users_05_01`, `users_lifecycle` 재개
 
 ## 로컬 실행
 
@@ -64,4 +66,5 @@ npx playwright test --headed --reporter=list       # 디버깅
 npx playwright test --grep-invert "users_lifecycle" # 통합 테스트 제외
 ```
 
-설계 배경·스크립트 역할 → [architecture.md](architecture.md)
+설계 배경·스크립트 역할 → [architecture.md](architecture.md)  
+MCP 탐색·작성 → [mcp-workflow.md](mcp-workflow.md)

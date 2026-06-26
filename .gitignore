@@ -168,4 +168,7 @@ venv.bak/
 dmypy.json
 
 # Local environment (민감 정보)
-.env 
+.env
+
+# MCP 러너 결과
+playwright-mcp-e2e/results/ 

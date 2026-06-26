@@ -768,7 +768,7 @@ async function executeScenario(page, scenario, testData) {
 }
 
 // 메인 테스트 함수들
-test.describe('Agent Studio CSV 기반 테스트', () => {
+test.describe('CSV 자연어 시나리오 테스트', () => {
     let testData;
     let scenarios;
 

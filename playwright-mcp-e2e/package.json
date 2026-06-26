@@ -1,0 +1,19 @@
+{
+  "name": "playwright-mcp-e2e",
+  "version": "1.0.0",
+  "description": "nl-scenario-pipeline — CSV 자연어 시나리오 Playwright MCP 러너 (rules 기본, llm 선택)",
+  "type": "module",
+  "scripts": {
+    "run": "node src/index.js",
+    "run:llm": "node src/index.js --mode llm",
+    "run:rules": "node src/index.js --mode rules",
+    "list": "node src/index.js --list"
+  },
+  "keywords": ["nl-scenario", "playwright", "mcp", "qa"],
+  "license": "ISC",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.3",
+    "dotenv": "^16.4.7",
+    "openai": "^6.15.0"
+  }
+}
