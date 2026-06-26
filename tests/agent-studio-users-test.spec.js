@@ -905,7 +905,7 @@ test.describe('Agent Studio CSV 기반 테스트', () => {
         }
     });
 
-    test('사용자 라이프사이클 통합 테스트: 등록 → 상세확인 → 비활성화 → 삭제', async ({ page }) => {
+    test('users_lifecycle: 등록 → 상세확인 → 비활성화 → 삭제', async ({ page }) => {
         // 로그인 및 사용자 등록 화면으로 이동
         await performLogin(page, testData);
         await navigateToUserManagement(page);

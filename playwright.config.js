@@ -5,6 +5,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 module.exports = defineConfig({
   testDir: './tests',
+  globalTeardown: require.resolve('./tests/helpers/normalize-test-results.js'),
   timeout: 30000,
   expect: {
     timeout: 5000
